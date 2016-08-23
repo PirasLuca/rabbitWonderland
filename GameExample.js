@@ -9,7 +9,6 @@ Game.loadAssets = function () {
     sprites.cannon = Game.loadSprite("assets/spr_cannon_barrel.png");
     sprites.ball = Game.loadSprite("assets/spr_ball.png");
     sprites.ufo = Game.loadSprite("assets/spr_ufo.png");
-    sprites.crash = Game.loadSprite("assets/crash.jpg");
 };
 
 /* Here we create the game world. In this example, a separate class (called GameWorld) is used for that. */
@@ -111,15 +110,7 @@ function Ufo() {
     this.setRandomPosition();
 }
 
-function Crash() {
-    GameObject.call(this);
-    this.sprite = sprites.crash;
-    this.timePassed = 0;
-    this.setRandomPosition();
-}
-
 Ufo.prototype = Object.create(GameObject.prototype); // needed for proper inheritance in JavaScript
-Crash.prototype = Object.create(GameObject.prototype); // needed for proper inheritance in JavaScript
 
 /* Updating the ufo. */
 Ufo.prototype.update = function (delta) {
@@ -137,26 +128,11 @@ Ufo.prototype.update = function (delta) {
         this.timePassed = 0;
         Game.gameWorld.score += 10;
         Game.gameWorld.ball.visible = false;
-        
-        //Game.gameWorld.crash.visible = true;
-        //Game.gameWorld.crash.draw();
-
-    }
-};
-
-Crash.prototype.update = function (delta) {
-    if (this.visible) {
-        Game.gameWorld.crash.draw();
     }
 };
 
 /* Sets the ufo at a random position. */
 Ufo.prototype.setRandomPosition = function () {
-    this.position.x = Math.random() * (Game.size.x - 200 - this.sprite.width) + 200;
-    this.position.y = Math.random() * (Game.size.y - this.sprite.height);
-};
-
-Crash.prototype.setRandomPosition = function () {
     this.position.x = Math.random() * (Game.size.x - 200 - this.sprite.width) + 200;
     this.position.y = Math.random() * (Game.size.y - this.sprite.height);
 };
@@ -170,7 +146,6 @@ function GameWorld() {
     this.cannon = new Cannon();
     this.ball = new Ball();
     this.ufo = new Ufo();
-    this.crash = new Crash();
     this.score = 0;
 }
 
@@ -184,7 +159,6 @@ GameWorld.prototype.handleInput = function () {
 GameWorld.prototype.update = function (delta) {
     this.ball.update(delta);
     this.ufo.update(delta);
-    this.crash.update(delta);
 };
 
 /* Drawing everything on the screen in the right order. */
@@ -193,7 +167,5 @@ GameWorld.prototype.draw = function () {
     this.ball.draw();
     this.cannon.draw();
     this.ufo.draw();
-    this.crash.visible = false;
-    this.crash.draw();
     Canvas2D.drawText("Score: " + this.score, new Vector2(20, 22), Color.white);
 };
