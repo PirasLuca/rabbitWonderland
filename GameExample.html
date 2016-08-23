@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>GameExample</title>
+    <link rel="stylesheet" type="text/css" href="game-layout.css"/>
+    <script src="LAB.min.js"></script>
+    <script>
+
+        $LAB
+                .script('tools/Vector2.js').wait()
+                .script('tools/Rectangle.js').wait()
+                .script('tools/ButtonState.js').wait()
+                .script('tools/Keyboard.js').wait()
+                .script('tools/Mouse.js').wait()
+                .script('tools/Canvas2D.js').wait()
+                .script('tools/Color.js').wait()
+                .script('tools/Keys.js').wait()
+                .script('tools/Sound.js').wait()
+                .script('tools/Game.js').wait()
+
+                .script('GameExample.js').wait(function () {
+                    Game.start('mycanvas', 800, 480);
+                });
+
+    </script>
+</head>
+<body>
+<div id="gameArea">
+    <canvas id="mycanvas" width="800" height="480"></canvas>
+</div>
+</body>
+</html>
