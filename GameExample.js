@@ -5,10 +5,15 @@ var sprites = {};
 
 /* All sprite loading should be done in this function. The function is automatically called in the game engine. */
 Game.loadAssets = function () {
-    sprites.background = Game.loadSprite("assets/spr_background.png");
+    sprites.background = Game.loadSprite("assets/img/Background.jpg");
     sprites.cannon = Game.loadSprite("assets/spr_cannon_barrel.png");
     sprites.ball = Game.loadSprite("assets/spr_ball.png");
     sprites.ufo = Game.loadSprite("assets/spr_ufo.png");
+
+    sprites.rabbit = Game.loadSprite("assets/img/rabbit3.png");
+    sprites.carrot = Game.loadSprite("assets/img/carrots11.png");
+
+    sprites.number1 = Game.loadSprite("assets/img/number1.png");
 };
 
 /* Here we create the game world. In this example, a separate class (called GameWorld) is used for that. */
@@ -139,6 +144,69 @@ Ufo.prototype.setRandomPosition = function () {
 
 // ==================================================================================
 
+/* The Carrot class represents the carrot in the game. */
+function Carrot() {
+    GameObject.call(this);
+    this.sprite = sprites.carrot;
+    //this.timePassed = 0;
+    this.setPosition();
+}
+
+Carrot.prototype = Object.create(GameObject.prototype); // needed for proper inheritance in JavaScript
+
+/* Sets the ufo at a random position. */
+Carrot.prototype.setPosition = function () {
+    this.position.x = 300;
+    this.position.y = 250;
+};
+
+// ==================================================================================
+
+/* The Number class */
+function Number() {
+    GameObject.call(this);
+    this.sprite = sprites.number1;
+    this.setPosition();
+    this.visible = true;
+}
+
+Number.prototype = Object.create(GameObject.prototype); // needed for proper inheritance in JavaScript
+
+/* Input handling: if the player presses the left mouse button, the ball gets a velocity and becomes visible. */
+Number.prototype.handleInput = function () {
+    if (Mouse.left.pressed && !this.visible) {
+        this.visible = true;
+        this.velocity = new Vector2(500, 0)
+    }
+};
+
+/* Updating the Number. */
+Number.prototype.update = function (delta) {
+    if (this.visible) {
+        // if the ball is visible, simply add the velocity to the current position
+        this.position.x += this.velocity.x * delta;
+    }
+    else {
+        // otherwise, simply set ball position at the cannon position.
+        this.position.x = 100;
+        this.position.y = Game.gameWorld.cannon.position.y;
+    }
+    if (this.position.x > Game.size.x) {
+        // if the ball flies outside of the screen, make it invisible and subtract points
+        // for not touching the ufo
+        this.visible = false;
+        Game.gameWorld.score -= 10;
+    }
+};
+
+/* Sets the Number a position. */
+Number.prototype.setPosition = function () {
+    this.position.x = 125;
+    this.position.y = 375;
+};
+
+// ==================================================================================
+
 /* The GameWorld class aggregates all the game object in the world, in this case the cannon,
    the ball and the ufo. It also contains a variable representing the current score.
  */
@@ -147,6 +215,9 @@ function GameWorld() {
     this.ball = new Ball();
     this.ufo = new Ufo();
     this.score = 0;
+
+    this.carrot = new Carrot();
+    this.number = new Number();
 }
 
 /* Let each object handle their own input. */
@@ -163,9 +234,20 @@ GameWorld.prototype.update = function (delta) {
 
 /* Drawing everything on the screen in the right order. */
 GameWorld.prototype.draw = function () {
-    Canvas2D.drawImage(sprites.background);
+    // (sprite, position, origin, rotation, scale)
+    Canvas2D.drawImage(sprites.background, new Vector2(0, 70));
     this.ball.draw();
     this.cannon.draw();
     this.ufo.draw();
     Canvas2D.drawText("Score: " + this.score, new Vector2(20, 22), Color.white);
+
+    Canvas2D.drawImage(sprites.rabbit, new Vector2(100, 200));
+
+    //text, position, color, textAlign, fontname, fontsize
+    Canvas2D.drawText("Rabbit in NederLand", new Vector2(150, 0), Color.orange, undefined, undefined, "40px");
+    Canvas2D.drawText("A fun way to learn how to assign numbers to quantity", new Vector2(75, 40), Color.blue, undefined, undefined, "20px");
+    
+    this.carrot.draw();
+    
+    this.number.draw();
 };
