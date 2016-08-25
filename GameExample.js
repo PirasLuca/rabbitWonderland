@@ -3,6 +3,12 @@
 /* This variable will contain all the sprites used in the game. */
 var sprites = {};
 
+var sounds = {};
+
+var carrots = []; 
+
+var correctAnswer = 5;
+
 /* All sprite loading should be done in this function. The function is automatically called in the game engine. */
 Game.loadAssets = function () {
     sprites.background = Game.loadSprite("assets/img/Background.jpg");
@@ -18,6 +24,14 @@ Game.loadAssets = function () {
     sprites.number3 = Game.loadSprite("assets/img/number3.png");
     sprites.number4 = Game.loadSprite("assets/img/number4.png");
     sprites.number5 = Game.loadSprite("assets/img/number5.png");
+
+    sounds.music = Game.loadSound("assets/Music/music");
+    sounds.wellDone = Game.loadSound("assets/Music/wellDone2");
+    sounds.failure = Game.loadSound("assets/Music/failure");
+
+    sounds.music.loop = true;
+    sounds.wellDone.loop = false;
+    sounds.failure.loop = false;
 };
 
 /* Here we create the game world. In this example, a separate class (called GameWorld) is used for that. */
@@ -152,8 +166,9 @@ Ufo.prototype.setRandomPosition = function () {
 function Carrot(x, y) {
     GameObject.call(this);
     this.sprite = sprites.carrot;
-    //this.timePassed = 0;
     this.setPosition(x, y);
+
+    this.visible = false;
 }
 
 Carrot.prototype = Object.create(GameObject.prototype); // needed for proper inheritance in JavaScript
@@ -166,21 +181,51 @@ Carrot.prototype.setPosition = function (x, y) {
 
 // ==================================================================================
 
+/* The Carrot class represents the carrot in the game. */
+function Rabbit(x, y) {
+    GameObject.call(this);
+    this.sprite = sprites.rabbit;
+    this.setPosition(x, y);
+
+    this.visible = true;
+}
+
+Rabbit.prototype = Object.create(GameObject.prototype); // needed for proper inheritance in JavaScript
+
+/* Sets the ufo at a random position. */
+Rabbit.prototype.setPosition = function (x, y) {
+    this.position.x = x;
+    this.position.y = y;
+};
+
+// ==================================================================================
+
 /* The Number class */
-function Number(img, x, y) {
+function Number(img, x, y, id) {
     GameObject.call(this);
     this.sprite = img;
     this.setPosition(x, y);
     this.visible = true;
+
+    this.id = id;
 }
 
 Number.prototype = Object.create(GameObject.prototype); // needed for proper inheritance in JavaScript
 
 /* Input handling: if the player presses the left mouse button, the ball gets a velocity and becomes visible. */
 Number.prototype.handleInput = function () {
-    if (Mouse.left.pressed && !this.visible) {
-        this.visible = true;
-        this.velocity = new Vector2(500, 0)
+    //console.log(Mouse.left.pressed && this.box.contains(Mouse.position));
+    if (Mouse.left.pressed && this.box.contains(Mouse.position)) {
+        
+        if (this.id == correctAnswer) {
+            sounds.wellDone.play();
+
+            correctAnswer = generateCarrots();
+
+            //Game.gameWorld.rabbit.sprite = sprites.carrot;
+        } else {
+            sounds.failure.play();
+        }
     }
 };
 
@@ -220,6 +265,8 @@ function GameWorld() {
     this.ufo = new Ufo();
     this.score = 0;
 
+    this.rabbit = new Rabbit(50, 200);
+
     var deltaCarrot = 100;
     var xPos = 250;
     var yPos = 120;
@@ -229,22 +276,40 @@ function GameWorld() {
     this.carrot4 = new Carrot(xPos += deltaCarrot, yPos);
     this.carrot5 = new Carrot(xPos += deltaCarrot, yPos);
 
+    carrots.push(this.carrot1);
+    carrots.push(this.carrot2);
+    carrots.push(this.carrot3);
+    carrots.push(this.carrot4);
+    carrots.push(this.carrot5);
+
+    correctAnswer = generateCarrots();
+
     this.number = new Number();
 
     var deltaNumber = 100;
     xPos = 225;
     yPos = 375;
-    this.number1 = new Number(sprites.number1, xPos, yPos);        
-    this.number2 = new Number(sprites.number2, xPos += deltaNumber, yPos);
-    this.number3 = new Number(sprites.number3, xPos += deltaNumber, yPos);
-    this.number4 = new Number(sprites.number4, xPos += deltaNumber, yPos);
-    this.number5 = new Number(sprites.number5, xPos += deltaNumber, yPos);
+    this.number1 = new Number(sprites.number1, xPos, yPos, 1);        
+    this.number2 = new Number(sprites.number2, xPos += deltaNumber, yPos, 2);
+    this.number3 = new Number(sprites.number3, xPos += deltaNumber, yPos, 3);
+    this.number4 = new Number(sprites.number4, xPos += deltaNumber, yPos, 4);
+    this.number5 = new Number(sprites.number5, xPos += deltaNumber, yPos, 5);
+
+    //alert(getRandomInt(1, 5));
+
+    sounds.music.play();
 }
 
 /* Let each object handle their own input. */
 GameWorld.prototype.handleInput = function () {
     this.cannon.handleInput();
     this.ball.handleInput();
+
+    this.number1.handleInput();
+    this.number2.handleInput();
+    this.number3.handleInput();
+    this.number4.handleInput();
+    this.number5.handleInput();
 };
 
 /* Let each object update itself. */
@@ -262,12 +327,12 @@ GameWorld.prototype.draw = function () {
     //this.ufo.draw();
     Canvas2D.drawText("Score: " + this.score, new Vector2(20, 22), Color.white);
 
-    Canvas2D.drawImage(sprites.rabbit, new Vector2(50, 200));
-
     //text, position, color, textAlign, fontname, fontsize
     Canvas2D.drawText("Rabbit in NederLand", new Vector2(150, 0), Color.orange, undefined, undefined, "40px");
     Canvas2D.drawText("A fun way to learn how to assign numbers to quantity", new Vector2(75, 40), Color.blue, undefined, undefined, "20px");
     
+    this.rabbit.draw();
+
     this.carrot1.draw();        
     this.carrot2.draw();
     this.carrot3.draw();
@@ -280,3 +345,24 @@ GameWorld.prototype.draw = function () {
     this.number4.draw();
     this.number5.draw();
 };
+
+/**
+ * Returns a random integer between min (inclusive) and max (inclusive)
+ * Using Math.round() will give you a non-uniform distribution!
+ */
+function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function generateCarrots() {
+    for (var i = 0; i < carrots.length; i++) {
+        carrots[i].visible = false;
+    }
+
+    var randomCarrots = getRandomInt(1, 5);
+    for (var i = 0; i < randomCarrots; i++) {
+        carrots[i].visible = true;
+    }
+
+    return randomCarrots;
+}
