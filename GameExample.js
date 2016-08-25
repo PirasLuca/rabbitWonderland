@@ -14,6 +14,10 @@ Game.loadAssets = function () {
     sprites.carrot = Game.loadSprite("assets/img/carrots11.png");
 
     sprites.number1 = Game.loadSprite("assets/img/number1.png");
+    sprites.number2 = Game.loadSprite("assets/img/number2.png");
+    sprites.number3 = Game.loadSprite("assets/img/number3.png");
+    sprites.number4 = Game.loadSprite("assets/img/number4.png");
+    sprites.number5 = Game.loadSprite("assets/img/number5.png");
 };
 
 /* Here we create the game world. In this example, a separate class (called GameWorld) is used for that. */
@@ -145,28 +149,28 @@ Ufo.prototype.setRandomPosition = function () {
 // ==================================================================================
 
 /* The Carrot class represents the carrot in the game. */
-function Carrot() {
+function Carrot(x, y) {
     GameObject.call(this);
     this.sprite = sprites.carrot;
     //this.timePassed = 0;
-    this.setPosition();
+    this.setPosition(x, y);
 }
 
 Carrot.prototype = Object.create(GameObject.prototype); // needed for proper inheritance in JavaScript
 
 /* Sets the ufo at a random position. */
-Carrot.prototype.setPosition = function () {
-    this.position.x = 300;
-    this.position.y = 250;
+Carrot.prototype.setPosition = function (x, y) {
+    this.position.x = x;
+    this.position.y = y;
 };
 
 // ==================================================================================
 
 /* The Number class */
-function Number() {
+function Number(img, x, y) {
     GameObject.call(this);
-    this.sprite = sprites.number1;
-    this.setPosition();
+    this.sprite = img;
+    this.setPosition(x, y);
     this.visible = true;
 }
 
@@ -200,9 +204,9 @@ Number.prototype.update = function (delta) {
 };
 
 /* Sets the Number a position. */
-Number.prototype.setPosition = function () {
-    this.position.x = 125;
-    this.position.y = 375;
+Number.prototype.setPosition = function (x, y) {
+    this.position.x = x;
+    this.position.y = y;
 };
 
 // ==================================================================================
@@ -216,8 +220,25 @@ function GameWorld() {
     this.ufo = new Ufo();
     this.score = 0;
 
-    this.carrot = new Carrot();
+    var deltaCarrot = 100;
+    var xPos = 250;
+    var yPos = 120;
+    this.carrot1 = new Carrot(xPos, yPos);        
+    this.carrot2 = new Carrot(xPos += deltaCarrot, yPos);
+    this.carrot3 = new Carrot(xPos += deltaCarrot, yPos);
+    this.carrot4 = new Carrot(xPos += deltaCarrot, yPos);
+    this.carrot5 = new Carrot(xPos += deltaCarrot, yPos);
+
     this.number = new Number();
+
+    var deltaNumber = 100;
+    xPos = 225;
+    yPos = 375;
+    this.number1 = new Number(sprites.number1, xPos, yPos);        
+    this.number2 = new Number(sprites.number2, xPos += deltaNumber, yPos);
+    this.number3 = new Number(sprites.number3, xPos += deltaNumber, yPos);
+    this.number4 = new Number(sprites.number4, xPos += deltaNumber, yPos);
+    this.number5 = new Number(sprites.number5, xPos += deltaNumber, yPos);
 }
 
 /* Let each object handle their own input. */
@@ -236,18 +257,26 @@ GameWorld.prototype.update = function (delta) {
 GameWorld.prototype.draw = function () {
     // (sprite, position, origin, rotation, scale)
     Canvas2D.drawImage(sprites.background, new Vector2(0, 70));
-    this.ball.draw();
-    this.cannon.draw();
-    this.ufo.draw();
+    //this.ball.draw();
+    //this.cannon.draw();
+    //this.ufo.draw();
     Canvas2D.drawText("Score: " + this.score, new Vector2(20, 22), Color.white);
 
-    Canvas2D.drawImage(sprites.rabbit, new Vector2(100, 200));
+    Canvas2D.drawImage(sprites.rabbit, new Vector2(50, 200));
 
     //text, position, color, textAlign, fontname, fontsize
     Canvas2D.drawText("Rabbit in NederLand", new Vector2(150, 0), Color.orange, undefined, undefined, "40px");
     Canvas2D.drawText("A fun way to learn how to assign numbers to quantity", new Vector2(75, 40), Color.blue, undefined, undefined, "20px");
     
-    this.carrot.draw();
-    
-    this.number.draw();
+    this.carrot1.draw();        
+    this.carrot2.draw();
+    this.carrot3.draw();
+    this.carrot4.draw();
+    this.carrot5.draw();
+
+    this.number1.draw();
+    this.number2.draw();
+    this.number3.draw();
+    this.number4.draw();
+    this.number5.draw();
 };
